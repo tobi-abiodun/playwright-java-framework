@@ -1,0 +1,6 @@
+loginPage:
+  usernameField: "#username"
+  passwordField: "#password"
+  loginButton: "#loginBtn"
+  dashboard: "#dashboard"
+  errorMessage: "#errorMessage"
