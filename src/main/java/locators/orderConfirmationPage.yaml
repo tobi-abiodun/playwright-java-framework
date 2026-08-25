@@ -1,0 +1,10 @@
+# Order Confirmation — locators only (checkout complete)
+# Screen: Checkout — Order Confirmation
+# URL: /checkout-complete.html
+
+orderConfirmationPage:
+  heading: "text=Thank you for your order!"
+  completeHeader: "data-test=complete-header"
+  completeText: "data-test=complete-text"
+  backHomeButton: "role=button[name='Back Home']"
+  ponyExpressImage: "data-test=pony-express"

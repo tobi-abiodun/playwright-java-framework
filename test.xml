@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!--
+  Only E2E tests. Right-click this file → Run, or: mvn test
+-->
+<suite name="Playwright Automation Suite" verbose="1" parallel="false">
+
+    <test name="E2E Tests">
+        <classes>
+            <class name="tests.E2E"/>
+        </classes>
+    </test>
+
+</suite>

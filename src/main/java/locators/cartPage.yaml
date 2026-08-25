@@ -1,0 +1,10 @@
+# Sauce Demo cart page — locators only.
+
+cartPage:
+  cartHeading: "data-test=title"
+  cartList: "data-test=cart-list"
+  itemName: "data-test=inventory-item-name"
+  itemQuantity: "data-test=item-quantity"
+  checkoutButton: "role=button[name='Checkout']"
+  continueShoppingButton: "role=button[name='Continue Shopping']"
+  cartBadge: "data-test=shopping-cart-badge"

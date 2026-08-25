@@ -1,0 +1,13 @@
+# Order Summary — locators only (checkout step two / overview)
+
+orderSummaryPage:
+  heading: "data-test=title"
+  cartList: "data-test=cart-list"
+  itemName: "data-test=inventory-item-name"
+  finishButton: "role=button[name='Finish']"
+  cancelButton: "role=button[name='Cancel']"
+  itemTotalLabel: "data-test=subtotal-label"
+  taxLabel: "data-test=tax-label"
+  totalLabel: "data-test=total-label"
+  paymentInfoLabel: "text=Payment Information"
+  shippingInfoLabel: "text=Shipping Information"

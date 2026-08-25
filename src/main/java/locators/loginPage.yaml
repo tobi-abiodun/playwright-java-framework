@@ -1,6 +1,16 @@
+# Sauce Demo login page — locators only.
+# Used by LoginPage.java. Do not put actions or test data here.
+
 loginPage:
-  usernameField: "#username"
-  passwordField: "#password"
-  loginButton: "#loginBtn"
-  dashboard: "#dashboard"
-  errorMessage: "#errorMessage"
+  usernameField: "placeholder=Username"
+  passwordField: "placeholder=Password"
+  loginButton: "role=button[name='Login']"
+  errorMessage: "data-test=error"
+  productsHeading: "data-test=title"
+  inventoryList: "data-test=inventory-list"
+  acceptedUsersHeading: "role=heading[name='Accepted usernames are:']"
+  passwordHintHeading: "role=heading[name='Password for all users:']"
+  errorLockedOut: "text=Sorry, this user has been locked out"
+  errorBadCredentials: "text=Username and password do not match any user in this service"
+  errorUsernameRequired: "text=Username is required"
+  errorPasswordRequired: "text=Password is required"

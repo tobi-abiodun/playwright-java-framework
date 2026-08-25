@@ -1,68 +1,103 @@
 package pages;
 
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
-import utils.YamlLocatorReader;
+import utils.LocatorFactory;
+import utils.YamlReader;
 
-import java.nio.file.Paths;
 import java.util.Map;
 
 /**
  * LoginPage
  * ---------
- * Page Object for the login screen.
- * - Reads selectors from loginPage.yaml
- * - Exposes action methods (navigate, type, click)
- * - Exposes state methods (is element visible?)
- * Tests and BBI classes should not use Playwright directly for login; they call this class.
+ * Page Object for the Sauce Demo login screen.
+ * Reads locators from loginPage.yaml and exposes ONLY element getters.
+ * Clicks, fills, and assertions belong in LoginPageUtil — not here.
  */
 public class LoginPage {
 
     private final Page page;
-    private final Map<String, String> locators;
-
-    // Demo login page used by the sample tests (served from the demo/ folder)
-    private static final String DEMO_LOGIN_URL = Paths.get("demo", "login.html")
-            .toAbsolutePath()
-            .toUri()
-            .toString();
+    private final Locator usernameField;
+    private final Locator passwordField;
+    private final Locator loginButton;
+    private final Locator errorMessage;
+    private final Locator productsHeading;
+    private final Locator inventoryList;
+    private final Locator acceptedUsersHeading;
+    private final Locator passwordHintHeading;
+    private final Locator errorLockedOut;
+    private final Locator errorBadCredentials;
+    private final Locator errorUsernameRequired;
+    private final Locator errorPasswordRequired;
 
     public LoginPage(Page page) {
         this.page = page;
-        // Load all selectors for the login page from YAML once when the object is created
-        this.locators = YamlLocatorReader.loadLocators("loginPage.yaml", "loginPage");
+        Map<String, String> locators = YamlReader.readLocators("loginPage.yaml", "loginPage");
+
+        this.usernameField = LocatorFactory.fromYaml(page, locators.get("usernameField"));
+        this.passwordField = LocatorFactory.fromYaml(page, locators.get("passwordField"));
+        this.loginButton = LocatorFactory.fromYaml(page, locators.get("loginButton"));
+        this.errorMessage = LocatorFactory.fromYaml(page, locators.get("errorMessage"));
+        this.productsHeading = LocatorFactory.fromYaml(page, locators.get("productsHeading"));
+        this.inventoryList = LocatorFactory.fromYaml(page, locators.get("inventoryList"));
+        this.acceptedUsersHeading = LocatorFactory.fromYaml(page, locators.get("acceptedUsersHeading"));
+        this.passwordHintHeading = LocatorFactory.fromYaml(page, locators.get("passwordHintHeading"));
+        this.errorLockedOut = LocatorFactory.fromYaml(page, locators.get("errorLockedOut"));
+        this.errorBadCredentials = LocatorFactory.fromYaml(page, locators.get("errorBadCredentials"));
+        this.errorUsernameRequired = LocatorFactory.fromYaml(page, locators.get("errorUsernameRequired"));
+        this.errorPasswordRequired = LocatorFactory.fromYaml(page, locators.get("errorPasswordRequired"));
     }
 
-    // -------------------- ACTION METHODS --------------------
-
-    /** Opens the login page in the browser. */
-    public void goToLoginPage() {
-        page.navigate(DEMO_LOGIN_URL);
+    /** Playwright page — used by LoginPageUtil for navigate and URL checks only. */
+    public Page page() {
+        return page;
     }
 
-    /** Types the username into the username field. */
-    public void enterUsername(String username) {
-        page.locator(locators.get("usernameField")).fill(username);
+    public Locator usernameField() {
+        return usernameField;
     }
 
-    /** Types the password into the password field. */
-    public void enterPassword(String password) {
-        page.locator(locators.get("passwordField")).fill(password);
+    public Locator passwordField() {
+        return passwordField;
     }
 
-    /** Clicks the login button. */
-    public void clickLoginButton() {
-        page.locator(locators.get("loginButton")).click();
+    public Locator loginButton() {
+        return loginButton;
     }
 
-    // -------------------- STATE METHODS --------------------
-
-    /** Returns true when the dashboard element is visible (successful login). */
-    public boolean isDashboardVisible() {
-        return page.locator(locators.get("dashboard")).isVisible();
+    public Locator errorMessage() {
+        return errorMessage;
     }
 
-    /** Returns true when the error message element is visible (failed login). */
-    public boolean isErrorVisible() {
-        return page.locator(locators.get("errorMessage")).isVisible();
+    public Locator productsHeading() {
+        return productsHeading;
+    }
+
+    public Locator inventoryList() {
+        return inventoryList;
+    }
+
+    public Locator acceptedUsersHeading() {
+        return acceptedUsersHeading;
+    }
+
+    public Locator passwordHintHeading() {
+        return passwordHintHeading;
+    }
+
+    public Locator errorLockedOut() {
+        return errorLockedOut;
+    }
+
+    public Locator errorBadCredentials() {
+        return errorBadCredentials;
+    }
+
+    public Locator errorUsernameRequired() {
+        return errorUsernameRequired;
+    }
+
+    public Locator errorPasswordRequired() {
+        return errorPasswordRequired;
     }
 }

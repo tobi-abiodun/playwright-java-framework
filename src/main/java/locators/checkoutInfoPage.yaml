@@ -1,0 +1,13 @@
+# Checkout Info — locators only (step one)
+# Screen: Checkout — Your Information
+# URL: /checkout-step-one.html
+
+checkoutInfoPage:
+  heading: "data-test=title"
+  firstNameField: "placeholder=First Name"
+  lastNameField: "placeholder=Last Name"
+  postalCodeField: "placeholder=Zip/Postal Code"
+  continueButton: "role=button[name='Continue']"
+  cancelButton: "role=button[name='Cancel']"
+  errorMessage: "data-test=error"
+  errorFirstNameRequired: "text=First Name is required"

@@ -1,0 +1,11 @@
+# Checkout customer details. Change values here — not in Java.
+
+validCustomer:
+  firstName: Tobi
+  lastName: Tester
+  postalCode: "12345"
+
+missingFirstName:
+  firstName: ""
+  lastName: Tester
+  postalCode: "12345"

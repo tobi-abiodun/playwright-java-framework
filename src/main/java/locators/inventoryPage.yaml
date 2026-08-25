@@ -1,0 +1,10 @@
+# Sauce Demo inventory page — locators only.
+
+inventoryPage:
+  productsHeading: "data-test=title"
+  inventoryList: "data-test=inventory-list"
+  shoppingCartLink: "data-test=shopping-cart-link"
+  cartBadge: "data-test=shopping-cart-badge"
+  sortDropdown: "data-test=product-sort-container"
+  itemName: "data-test=inventory-item-name"
+  openMenuButton: "data-test=open-menu"
