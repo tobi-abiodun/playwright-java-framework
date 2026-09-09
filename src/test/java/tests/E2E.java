@@ -77,7 +77,7 @@ public class E2E extends BaseTest {
     }
 
     private void addProductAndBadge(String productKey, String badge) {
-        inventoryTestFlow.addProduct(name(productKey), addBtn(productKey), removeBtn(productKey)); // TF8
+        inventoryTestFlow.addProduct(name(productKey), addBtn(productKey), removeBtn(productKey), badge); // TF8
         inventoryTestFlow.validateCartBadge(badge); // TF10
     }
 
@@ -125,14 +125,14 @@ public class E2E extends BaseTest {
         inventoryTestFlow.validateCartBadge("2"); // TF10
         inventoryTestFlow.openCart(); // TF11
         cartTestFlow.validateScreen(); // TF14
-        cartTestFlow.validateItemVisibleOnly(name(TestDataReader.BACKPACK)); // TF15
-        cartTestFlow.validateItemVisibleOnly(name(TestDataReader.BIKE_LIGHT)); // TF15
+        cartTestFlow.validateItemVisible(name(TestDataReader.BACKPACK)); // TF15
+        cartTestFlow.validateItemVisible(name(TestDataReader.BIKE_LIGHT)); // TF15
         checkoutValidCustomer();
         orderSummaryTestFlow.validateScreen(); // TF23
-        orderSummaryTestFlow.validateItemVisible(name(TestDataReader.BACKPACK));
-        orderSummaryTestFlow.validateItemVisible(name(TestDataReader.BIKE_LIGHT));
-        orderSummaryTestFlow.validateTotals(); // TF24
-        orderSummaryTestFlow.validateItemAndTotals(name(TestDataReader.BACKPACK), "$39.98"); // Item total = both products
+        orderSummaryTestFlow.validateItemsAndTotals(
+                "$39.98",
+                name(TestDataReader.BACKPACK),
+                name(TestDataReader.BIKE_LIGHT)); // TF24
         orderSummaryTestFlow.finish(); // TF25
         orderConfirmationTestFlow.validateScreen(); // TF27
     }
@@ -167,19 +167,22 @@ public class E2E extends BaseTest {
         addProductAndBadge(TestDataReader.BACKPACK, "1");
         inventoryTestFlow.openCart(); // TF11
         cartTestFlow.validateScreen(); // TF14
-        cartTestFlow.continueShopping(); // TF16
-        inventoryTestFlow.validateScreen(); // back on inventory
+        cartTestFlow.continueShopping("1"); // TF16
+        inventoryTestFlow.validateScreen();
         inventoryTestFlow.addSecondProduct(name(TestDataReader.BIKE_LIGHT), addBtn(TestDataReader.BIKE_LIGHT), removeBtn(TestDataReader.BIKE_LIGHT)); // TF9
-        inventoryTestFlow.validateCartBadge("2");
+        inventoryTestFlow.validateCartBadge("2"); // TF10
         inventoryTestFlow.openCart(); // TF11
         cartTestFlow.validateScreen(); // TF14
-        cartTestFlow.validateItemVisibleOnly(name(TestDataReader.BACKPACK));
-        cartTestFlow.validateItemVisibleOnly(name(TestDataReader.BIKE_LIGHT));
+        cartTestFlow.validateItemVisible(name(TestDataReader.BACKPACK)); // TF15
+        cartTestFlow.validateItemVisible(name(TestDataReader.BIKE_LIGHT)); // TF15
         checkoutValidCustomer();
-        orderSummaryTestFlow.validateScreen();
-        orderSummaryTestFlow.validateTotals();
-        orderSummaryTestFlow.finish();
-        orderConfirmationTestFlow.validateScreen();
+        orderSummaryTestFlow.validateScreen(); // TF23
+        orderSummaryTestFlow.validateItemsAndTotals(
+                "$39.98",
+                name(TestDataReader.BACKPACK),
+                name(TestDataReader.BIKE_LIGHT)); // TF24
+        orderSummaryTestFlow.finish(); // TF25
+        orderConfirmationTestFlow.validateScreen(); // TF27
     }
 
     @Test(description = "TS008 — Verify remove from cart then still place an order")
@@ -189,8 +192,9 @@ public class E2E extends BaseTest {
         inventoryTestFlow.addSecondProduct(name(TestDataReader.BIKE_LIGHT), addBtn(TestDataReader.BIKE_LIGHT), removeBtn(TestDataReader.BIKE_LIGHT));
         inventoryTestFlow.openCart();
         cartTestFlow.validateScreen();
-        cartTestFlow.removeProduct(removeBtn(TestDataReader.BACKPACK), name(TestDataReader.BACKPACK)); // TF18
-        cartTestFlow.validateItemVisible(name(TestDataReader.BIKE_LIGHT));
+        cartTestFlow.removeProduct(removeBtn(TestDataReader.BACKPACK), name(TestDataReader.BACKPACK), "1"); // TF18
+        inventoryTestFlow.validateCartBadge("1"); // TF10
+        cartTestFlow.validateItemVisible(name(TestDataReader.BIKE_LIGHT)); // TF15
         checkoutValidCustomer();
         summaryFinishConfirm(TestDataReader.BIKE_LIGHT);
     }

@@ -3,6 +3,7 @@
 cartPage:
   cartHeading: "data-test=title"
   cartList: "data-test=cart-list"
+  cartItem: "css=.cart_item"
   itemName: "data-test=inventory-item-name"
   itemQuantity: "data-test=item-quantity"
   checkoutButton: "role=button[name='Checkout']"

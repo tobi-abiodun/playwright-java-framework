@@ -2,6 +2,7 @@ package utils;
 
 import com.microsoft.playwright.Page;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,10 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * ScreenshotUtil
- * --------------
- * Captures a screenshot when a test fails (or on demand).
- * Files are saved under test-results/screenshots/.
+ * ScreenshotUtil — captures failure screenshots under test-results/screenshots/.
  */
 public final class ScreenshotUtil {
 
@@ -24,9 +22,6 @@ public final class ScreenshotUtil {
 
     /**
      * Takes a screenshot and returns the file path.
-     *
-     * @param page     active Playwright page
-     * @param testName name used in the screenshot file name
      */
     public static String captureScreenshot(Page page, String testName) {
         try {
@@ -43,5 +38,19 @@ public final class ScreenshotUtil {
         } catch (Exception exception) {
             throw new RuntimeException("Failed to capture screenshot for test: " + testName, exception);
         }
+    }
+
+    /**
+     * Captures a screenshot as PNG bytes (for Allure attachments).
+     */
+    public static byte[] captureScreenshotBytes(Page page) {
+        return page.screenshot();
+    }
+
+    /**
+     * Reads an existing screenshot file as bytes.
+     */
+    public static byte[] readBytes(String path) throws IOException {
+        return Files.readAllBytes(Paths.get(path));
     }
 }
