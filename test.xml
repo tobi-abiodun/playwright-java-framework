@@ -4,6 +4,10 @@
 -->
 <suite name="Playwright Automation Suite" verbose="1" parallel="false">
 
+    <listeners>
+        <listener class-name="listeners.ScreenshotListener"/>
+    </listeners>
+
     <test name="E2E Tests">
         <classes>
             <class name="tests.E2E"/>

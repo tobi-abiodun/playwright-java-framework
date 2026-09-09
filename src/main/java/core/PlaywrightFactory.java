@@ -1,26 +1,33 @@
 package core;
 
 import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.Tracing;
 import config.ConfigReader;
+import utils.LoggerUtil;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
- * PlaywrightFactory
- * -----------------
- * Creates and closes Playwright browser sessions using values from config.properties.
- * All tests should get their Page from here (via BaseTest) instead of creating Playwright manually.
+ * PlaywrightFactory — creates browser sessions from config (with CLI -D overrides).
  */
 public class PlaywrightFactory {
 
+    private static final Path TRACE_DIR = Paths.get("test-results", "traces");
+
     private Playwright playwright;
     private Browser browser;
+    private BrowserContext context;
     private Page page;
+    private boolean tracingStarted;
 
     /**
-     * Starts Playwright, launches the configured browser, and returns a new Page.
-     * Applies default timeouts from config.
+     * Starts Playwright, launches the configured browser, starts tracing, and returns a new Page.
      */
     public Page createPage() {
         playwright = Playwright.create();
@@ -31,7 +38,14 @@ public class PlaywrightFactory {
                 .setHeadless(ConfigReader.isHeadless());
 
         browser = selectBrowser(playwright).launch(launchOptions);
-        page = browser.newPage();
+        context = browser.newContext();
+        context.tracing().start(new Tracing.StartOptions()
+                .setScreenshots(true)
+                .setSnapshots(true)
+                .setSources(true));
+        tracingStarted = true;
+
+        page = context.newPage();
 
         double timeout = ConfigReader.getTimeout();
         page.setDefaultTimeout(timeout);
@@ -40,18 +54,64 @@ public class PlaywrightFactory {
         return page;
     }
 
-    /** Closes page, browser, and Playwright. Safe to call even if createPage() was not called. */
+    /**
+     * Stops tracing: saves a zip on failure, discards on pass.
+     */
+    public void stopTracing(boolean save, String testName) {
+        if (context == null || !tracingStarted) {
+            return;
+        }
+        try {
+            if (save) {
+                if (!Files.exists(TRACE_DIR)) {
+                    Files.createDirectories(TRACE_DIR);
+                }
+                String safeName = testName.replaceAll("[^a-zA-Z0-9_-]", "_");
+                Path tracePath = TRACE_DIR.resolve(safeName + ".zip");
+                context.tracing().stop(new Tracing.StopOptions().setPath(tracePath));
+                LoggerUtil.info("Saved Playwright trace: " + tracePath);
+            } else {
+                context.tracing().stop();
+            }
+        } catch (Exception exception) {
+            LoggerUtil.error("Failed to stop Playwright tracing", exception);
+        } finally {
+            tracingStarted = false;
+        }
+    }
+
+    /** Closes page, context, browser, and Playwright. */
     public void close() {
         if (page != null) {
-            page.close();
+            try {
+                page.close();
+            } catch (Exception ignored) {
+                // already closed
+            }
             page = null;
         }
+        if (context != null) {
+            try {
+                context.close();
+            } catch (Exception ignored) {
+                // already closed
+            }
+            context = null;
+        }
         if (browser != null) {
-            browser.close();
+            try {
+                browser.close();
+            } catch (Exception ignored) {
+                // already closed
+            }
             browser = null;
         }
         if (playwright != null) {
-            playwright.close();
+            try {
+                playwright.close();
+            } catch (Exception ignored) {
+                // already closed
+            }
             playwright = null;
         }
     }

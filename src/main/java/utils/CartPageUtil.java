@@ -53,6 +53,20 @@ public class CartPageUtil {
         }
     }
 
+    public void assertInventoryUrl() {
+        String url = cartPage.page().url();
+        if (!url.contains("/inventory.html")) {
+            throw new AssertionError("Expected /inventory.html but URL was " + url);
+        }
+    }
+
+    public void assertCheckoutStepOneUrl() {
+        String url = cartPage.page().url();
+        if (!url.contains("/checkout-step-one.html")) {
+            throw new AssertionError("Expected /checkout-step-one.html but URL was " + url);
+        }
+    }
+
     public void assertItemVisible(String itemName) {
         Locator item = cartPage.itemName().filter(new Locator.FilterOptions().setHasText(itemName));
         assertVisible(item, "cart item " + itemName);
@@ -65,11 +79,16 @@ public class CartPageUtil {
         }
     }
 
-    public void assertItemQuantity(String expectedQuantity) {
-        assertVisible(cartPage.itemQuantity().first(), "item quantity");
-        String actual = cartPage.itemQuantity().first().innerText().trim();
+    /** Per-item quantity scoped to the cart row that contains the product name. */
+    public void assertItemQuantity(String itemName, String expectedQuantity) {
+        Locator row = cartPage.cartItem().filter(new Locator.FilterOptions().setHasText(itemName));
+        assertVisible(row, "cart row for " + itemName);
+        Locator quantity = row.getByTestId("item-quantity");
+        assertVisible(quantity, "item quantity for " + itemName);
+        String actual = quantity.innerText().trim();
         if (!expectedQuantity.equals(actual)) {
-            throw new AssertionError("Expected quantity '" + expectedQuantity + "' but was '" + actual + "'.");
+            throw new AssertionError(
+                    "Expected quantity '" + expectedQuantity + "' for '" + itemName + "' but was '" + actual + "'.");
         }
     }
 

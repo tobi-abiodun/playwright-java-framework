@@ -21,3 +21,6 @@ Thumbs.db
 # Playwright
 test-results/
 playwright-report/
+allure-results/
+allure-report/
+

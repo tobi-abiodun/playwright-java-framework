@@ -2,21 +2,22 @@
 
 A layered Playwright + Java test automation framework using Page Object Model, YAML locators, validation utilities, and reusable scenario flows.
 
-**Build plan:** see [ROADMAP.md](ROADMAP.md) for the step-by-step plan, current progress, and what we will do next together.
+**Build plan:** see [ROADMAP.md](ROADMAP.md) for status and history.
 
 ## Architecture
 
 ```
-config/config.properties     → URLs, browser, timeouts
+config/config.properties     → URLs, browser, timeouts (overridable via -D)
         ↓
-core/PlaywrightFactory       → Creates browser and page
-core/BaseTest                → Shared setup/teardown for all tests
+core/PlaywrightFactory       → Browser + context + tracing
+core/BaseTest                → Shared setup/teardown; saves traces on failure
         ↓
 locators/*.yaml              → Element selectors
 pages/*.java                 → Page actions and state checks
-utils/*Util.java             → Validations and helpers
-testflow/*TestFlow.java      → Reusable test flows (scenarios)
-tests/*.java                 → Test classes
+utils/*Util.java             → Validations and helpers (+ LoggerUtil, ScreenshotUtil)
+testflow/*TestFlow.java      → Reusable test flows (scenarios TF1–TF28)
+tests/*.java                 → Test classes (TS001–TS020)
+listeners/ScreenshotListener → Failure screenshots + Allure attachments
 ```
 
 | Layer | Example | Purpose |
@@ -25,7 +26,7 @@ tests/*.java                 → Test classes
 | Page Object | `LoginPage.java` | Browser actions + element state |
 | Validation Util | `LoginPageUtil.java` | Assertion / validation methods |
 | TestFlow | `LoginTestFlow.java` | Reusable screen/scenario flows |
-| Test | `E2E.java` | Ten screen-by-screen end-to-end tests |
+| Test | `E2E.java` | End-to-end cases TS001–TS020 |
 
 ## Project structure
 
@@ -36,19 +37,20 @@ src/
     core/PlaywrightFactory.java
     locators/          # login, inventory, cart, checkoutInfo, orderSummary, orderConfirmation
     pages/             # one Page Object per screen (+ BasePage)
-    utils/             # *PageUtil + WaitUtil, YamlReader, LocatorFactory, …
-    testflow/          # *TestFlow per screen
+    utils/             # *PageUtil + WaitUtil, YamlReader, LoggerUtil, ScreenshotUtil
+    testflow/          # *TestFlow per screen (TF1–TF28)
   main/resources/config/config.properties
   test/java/
     core/BaseTest.java
     tests/E2E.java
-    listeners/, utils/
-  test/resources/testdata/
-test-cases/
-  README.md
-  E2E-TESTCASES.md
-  testflows/           # TF specs per screen
-test.xml
+    listeners/ScreenshotListener.java
+    utils/TestDataReader.java
+  test/resources/
+    testdata/
+    allure.properties
+test-cases/            # TF/TS documentation
+test.xml               # TestNG suite (+ ScreenshotListener)
+.github/workflows/tests.yml
 ```
 
 ## Prerequisites
@@ -86,19 +88,24 @@ headless=true                 # false to see the browser
 timeout=30000                 # milliseconds
 ```
 
+### CLI overrides
+
+System properties override `config.properties` (no Java edits):
+
+```bash
+mvn test -Dbrowser=firefox -Dheadless=false
+mvn test -Dbase.url=https://www.saucedemo.com -Dheadless=true
+```
+
 ## Run tests
 
 Tests are defined in **`test.xml`** at the project root.
-
-From the project root:
 
 ```bash
 mvn test
 ```
 
-Maven reads `test.xml` and runs every test class listed there.
-
-Run only the E2E tests (without test.xml):
+Run only the E2E class:
 
 ```bash
 mvn test -Dtest=tests.E2E
@@ -111,17 +118,30 @@ mvn test -Dtest=tests.E2E
 
 Case list (E2E + TestFlows): [test-cases/README.md](test-cases/README.md)
 
-### Add a new test to the suite
+## Failure evidence
 
-Open `test.xml` and add your class:
+On failure the suite produces:
 
-```xml
-<test name="My New Tests">
-    <classes>
-        <class name="tests.MyNewTest"/>
-    </classes>
-</test>
+| Artifact | Location |
+|----------|----------|
+| Screenshot | `test-results/screenshots/<test>_<timestamp>.png` |
+| Playwright trace | `test-results/traces/<test>.zip` |
+| Allure attachment | PNG attached to the failed Allure step |
+
+Open a trace:
+
+```bash
+mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="show-trace test-results/traces/<test>.zip"
 ```
+
+## Allure report
+
+```bash
+mvn test
+mvn allure:serve
+```
+
+Results are written to `allure-results/` (gitignored).
 
 ## Application under test
 
@@ -132,24 +152,16 @@ Users are stored in `src/test/resources/testdata/loginUsers.yaml` (not in Java):
 - **validUser:** `standard_user` / `secret_sauce` → products page
 - **invalidUser:** `locked_out_user` / `secret_sauce` → error message
 
-## Test data
+Products and checkout data live in `products.yaml` and `checkout.yaml`.
 
-All usernames, passwords, and similar inputs must come from YAML files under:
+## CI
 
-`src/test/resources/testdata/`
+GitHub Actions (`.github/workflows/tests.yml`) runs on push/PR to `main`:
 
-Example (`loginUsers.yaml`):
-
-```yaml
-validUser:
-  username: standard_user
-  password: secret_sauce
-invalidUser:
-  username: locked_out_user
-  password: secret_sauce
-```
-
-Tests load them with `TestDataReader`. Change the YAML only — never hard-code credentials in tests.
+- JDK 17 + Maven
+- Installs Chromium
+- `mvn test -Dheadless=true`
+- Uploads `test-results/` and `allure-results/` as artifacts
 
 ## Adding a new page
 
@@ -159,7 +171,7 @@ Follow the same pattern:
 2. Create `pages/NewPage.java`
 3. Create `utils/NewPageUtil.java` (validations)
 4. Create `testflow/NewTestFlow.java` (reusable flows)
-5. Create `tests/NewTest.java` extending `BaseTest`
+5. Create or extend a test in `tests/` extending `BaseTest`
 
 ## Tech stack
 
@@ -167,6 +179,7 @@ Follow the same pattern:
 - TestNG (suite via test.xml)
 - Maven
 - SnakeYAML
+- Allure
 
 ## Author
 
