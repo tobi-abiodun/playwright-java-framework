@@ -80,6 +80,20 @@ public class CheckoutInfoPageUtil {
         }
     }
 
+    public void assertOrderSummaryUrl() {
+        String url = page.page().url();
+        if (!url.contains("/checkout-step-two.html")) {
+            throw new AssertionError("Expected order summary URL but was " + url);
+        }
+    }
+
+    public void assertCartUrl() {
+        String url = page.page().url();
+        if (!url.contains("/cart.html")) {
+            throw new AssertionError("Expected /cart.html but URL was " + url);
+        }
+    }
+
     private void assertVisible(Locator locator, String elementName) {
         if (!WaitUtil.waitForVisible(locator)) {
             throw new AssertionError("Expected " + elementName + " to be visible.");

@@ -30,13 +30,26 @@ public final class ConfigReader {
         }
     }
 
-    /** Returns a property value, or null if the key is missing. */
+    /**
+     * Returns a property value. System properties (-Dkey=value) override config.properties.
+     */
     public static String getProperty(String key) {
+        String fromSystem = System.getProperty(key);
+        if (fromSystem != null && !fromSystem.isBlank()) {
+            return fromSystem;
+        }
         return PROPERTIES.getProperty(key);
     }
 
-    /** Returns a property value, or the default if the key is missing. */
+    /**
+     * Returns a property value, or the default if missing.
+     * System properties (-Dkey=value) override config.properties.
+     */
     public static String getProperty(String key, String defaultValue) {
+        String fromSystem = System.getProperty(key);
+        if (fromSystem != null && !fromSystem.isBlank()) {
+            return fromSystem;
+        }
         return PROPERTIES.getProperty(key, defaultValue);
     }
 
@@ -75,6 +88,11 @@ public final class ConfigReader {
     /** Whether the browser runs without a visible window. */
     public static boolean isHeadless() {
         return Boolean.parseBoolean(getProperty("headless", "true"));
+    }
+
+    /** Whether Playwright records a video for every test. */
+    public static boolean isVideoEnabled() {
+        return Boolean.parseBoolean(getProperty("video", "true"));
     }
 
     /** Default timeout in milliseconds. */

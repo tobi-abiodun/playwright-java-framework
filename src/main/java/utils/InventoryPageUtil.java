@@ -96,6 +96,17 @@ public class InventoryPageUtil {
         assertVisible(inventoryPage.buttonByTestId(addButtonTestId), "Add to cart button " + addButtonTestId);
     }
 
+    public void assertSortDropdownVisible() {
+        assertVisible(inventoryPage.sortDropdown(), "sort dropdown");
+    }
+
+    public void assertCartUrl() {
+        String url = inventoryPage.page().url();
+        if (!url.contains("/cart.html")) {
+            throw new AssertionError("Expected /cart.html but URL was " + url);
+        }
+    }
+
     public void assertFirstItemName(String expected) {
         String actual = firstItemName();
         if (!expected.equals(actual)) {

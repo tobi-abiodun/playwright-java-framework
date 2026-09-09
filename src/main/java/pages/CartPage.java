@@ -15,6 +15,7 @@ public class CartPage {
     private final Page page;
     private final Locator cartHeading;
     private final Locator cartList;
+    private final Locator cartItem;
     private final Locator itemName;
     private final Locator itemQuantity;
     private final Locator checkoutButton;
@@ -26,6 +27,7 @@ public class CartPage {
         Map<String, String> locators = YamlReader.readLocators("cartPage.yaml", "cartPage");
         this.cartHeading = LocatorFactory.fromYaml(page, locators.get("cartHeading"));
         this.cartList = LocatorFactory.fromYaml(page, locators.get("cartList"));
+        this.cartItem = LocatorFactory.fromYaml(page, locators.get("cartItem"));
         this.itemName = LocatorFactory.fromYaml(page, locators.get("itemName"));
         this.itemQuantity = LocatorFactory.fromYaml(page, locators.get("itemQuantity"));
         this.checkoutButton = LocatorFactory.fromYaml(page, locators.get("checkoutButton"));
@@ -43,6 +45,10 @@ public class CartPage {
 
     public Locator cartList() {
         return cartList;
+    }
+
+    public Locator cartItem() {
+        return cartItem;
     }
 
     public Locator itemName() {

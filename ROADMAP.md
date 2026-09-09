@@ -1,9 +1,11 @@
 # Framework build plan
 
-> **Status (2026-08-24):** Sauce Demo 6-screen TestFlow architecture is in place
+> **Status (2026-09-09):** Sauce Demo 6-screen TestFlow architecture is complete
 > (Login → Inventory → Cart → Checkout Info → Order Summary → Order Confirmation).
-> Specs use traditional TF/TS docs under `test-cases/` (not Gherkin). Combined
-> `test.xml`, implement missing TF methods to match TS001–TS020, then reporting/CI.
+> TF1–TF28 are assertion-complete; E2E covers TS001–TS020. Failure evidence
+> (screenshots + Allure + Playwright traces), **context video on every test**
+> (`test-results/videos/`, `-Dvideo=false` to disable), LoggerUtil, CLI `-D`
+> overrides, and GitHub Actions CI are in place. Suite entry: `test.xml`.
 >
 > Sections below for Steps 1–10 are **historical** and may be stale; trust this
 > banner and `test-cases/README.md` for current layout.
@@ -40,7 +42,7 @@ Example for login:
 | Page Object | `pages/LoginPage.java` | Actions + element state |
 | Validation Util | `utils/LoginPageUtil.java` | Assertions |
 | TestFlow | `testflow/LoginTestFlow.java` | Reusable flows |
-| Test | `tests/Login.java` | Calls TestFlow only |
+| Test | `tests/E2E.java` | Calls TestFlow only |
 
 When we add a new page, we repeat that same 5-file pattern. We do **not** put Playwright clicks inside tests.
 
@@ -48,11 +50,13 @@ When we add a new page, we repeat that same 5-file pattern. We do **not** put Pl
 
 ## Current snapshot (honest)
 
-**Done:** 6-screen YAML → Page → Util → TestFlow layers for Sauce Demo; E2E class;
-TF/TS docs under `test-cases/`.
+**Done:** 6-screen YAML → Page → Util → TestFlow layers; E2E TS001–TS020;
+TF/TS docs under `test-cases/`; ScreenshotListener + Allure; traces on failure;
+context video recording (every test); LoggerUtil; CLI overrides; GitHub Actions CI;
+refreshed README.
 
-**Next:** Run the suite, align Java TestFlows fully to TF1–TF28 / TS001–TS020,
-then screenshots/Allure/traces/CI (Steps 15–17).
+**Next (optional polish):** BasePage inheritance for all pages; move YAML locators
+under `src/main/resources/locators/`; Java package rename to `com.automation.framework.*`.
 
 ---
 
@@ -236,100 +240,66 @@ Each feature gets the same 5 files: YAML → Page → Util → TestFlow → Test
 
 ## Step 11 – Add utilities
 
-**Status:** `[~]` Partly done
+**Status:** `[x]` Done
 
 | Utility | Status | File |
 |---------|--------|------|
 | Wait helper | Done | `utils/WaitUtil.java` |
-| Screenshot helper | Started | `utils/ScreenshotUtil.java` |
-| Screenshot on failure listener | Started | `listeners/ScreenshotListener.java` |
-| Test data YAML | Done | `testdata/loginUsers.yaml` + `TestDataReader.java` |
-| Logger | Not started | `LoggerUtil.java` |
-
-**Still needed:**
-
-- Wire `ScreenshotListener` into `test.xml` (it exists but is not attached yet)
-- Add `LoggerUtil.java` so every flow logs steps clearly
-- Add Allure to `pom.xml` so failure screenshots attach to a real report (listener already imports Allure)
+| Screenshot helper | Done | `utils/ScreenshotUtil.java` |
+| Screenshot on failure listener | Done | `listeners/ScreenshotListener.java` (wired in `test.xml`) |
+| Test data YAML | Done | `testdata/*.yaml` + `TestDataReader.java` |
+| Logger | Done | `utils/LoggerUtil.java` |
 
 ---
 
 ## Step 12 – Add Playwright config and environment handling
 
-**Status:** `[~]` Core config done; extras remaining
+**Status:** `[x]` Done
 
 **Done:**
 
 - `src/main/resources/config/config.properties` (URL, browser, headless, timeout)
-- `config/ConfigReader.java`
-- `core/PlaywrightFactory.java`
-- `core/BaseTest.java`
-
-**Still needed:**
-
-- `base.url` for the real site (instead of dummy HTML path)
-- Optional video / trace on failure
-- Optional `dev` / `qa` / `stage` property files
+- `config/ConfigReader.java` (system properties override file values)
+- `core/PlaywrightFactory.java` (explicit context + tracing)
+- `core/BaseTest.java` (saves traces on failure)
 
 ---
 
 ## Step 13 – Create README for GitHub
 
-**Status:** `[~]` First version exists; needs a refresh when the real site is live
+**Status:** `[x]` Done — architecture, run, Allure, traces, CLI overrides, CI
 
 **File:** `README.md`
-
-Must later include:
-
-- Project purpose
-- Architecture diagram
-- How to run tests (`mvn test`, IntelliJ + `test.xml`)
-- Example flows
-- Screenshots of passing runs / Allure report
 
 ---
 
 ## Step 14 – Publish to GitHub
 
-**Status:** `[~]` Remote was set up; push / screenshots still needed
+**Status:** `[x]` Done — remote + CI workflow present
 
 Remote:
 
 `https://github.com/tobi-abiodun/playwright-java-framework.git`
 
-**Still needed:**
-
-- Commit remaining files
-- Push to GitHub
-- Add screenshots of test runs
-- Optional: GitHub Actions so tests run on every push
-
 ---
 
 ## What we should do next (in order)
 
-1. **You:** Run login tests (`test.xml` or `mvn test`) on Sauce Demo and share pass/fail.
-2. If login passes, start **Step 10**: inventory, add to cart, checkout (same YAML → Page → Util → TestFlow → Test pattern).
-3. Finish utilities: listener in `test.xml`, Allure, Logger.
-4. Add Playwright traces on failure.
-5. Add command-line overrides (`-Dbrowser`, `-Dheadless`).
-6. Refresh README screenshots.
-7. Add GitHub Actions CI.
-8. Push to GitHub.
-
-### Do not add extra pages until login works on Sauce Demo.
+1. Run `mvn test` locally / via CI and keep the suite green.
+2. Optional polish: BasePage inheritance, relocate YAML under resources, package rename.
+3. Optional: video recording, multi-browser matrix in CI.
 
 ---
 
 ## Session checklist
 
-Login against Sauce Demo is implemented. Next message can be:
+DoD reporting/CI items are implemented. Preferred next message:
 
 ```
-Login tests passed
+mvn test passed
 ```
 
-or paste any failure, then we add inventory / cart / checkout.
+or paste any failure.
 
 ---
 
@@ -352,19 +322,16 @@ Each one uses YAML → Page → Util → TestFlow → Test.
 
 Keep and finish these; do not recreate:
 
-- `pages/BasePage.java` — Page Objects should extend this
+- `pages/BasePage.java` — Page Objects should extend this (optional polish)
 - `utils/ScreenshotUtil.java`
 - `listeners/ScreenshotListener.java`
 - `src/test/resources/testdata/loginUsers.yaml`
 - `src/test/java/utils/TestDataReader.java`
-- `locators/dashboardPage.yaml`
 
-Gaps to close:
+Remaining optional polish:
 
-- `LoginPage` does **not** extend `BasePage` yet
-- `BaseTest` has no `getPage()` (needed by `ScreenshotListener`)
-- `pom.xml` has **no Allure** yet (listener already tries to use it)
-- No `DashboardPage` / `DashboardUtil` / dashboard test yet
+- Page objects do **not** extend `BasePage` yet (getter + YamlReader pattern)
+- YAML locators still under `src/main/java/locators/` (classpath resource include works)
 
 ---
 
@@ -393,40 +360,27 @@ Also:
 
 ### Failure evidence (must have)
 
-A failing test must leave proof. The original plan mentioned screenshots. A Playwright framework also needs **traces**.
+A failing test must leave proof.
 
-| Artifact | Why it is necessary |
-|----------|---------------------|
-| Screenshot on failure | Shows the UI at the moment of failure |
-| Playwright trace on failure | Lets you replay the test (clicks, network, DOM) |
-| Allure (or similar) report | Portfolio-friendly HTML report with attachments |
-
-Screenshots exist as files. They are not wired yet. Traces and Allure are not in the 14-step list as first-class steps.
+| Artifact | Why it is necessary | Status |
+|----------|---------------------|--------|
+| Screenshot on failure | Shows the UI at the moment of failure | Done |
+| Playwright trace on failure | Lets you replay the test (clicks, network, DOM) | Done |
+| Allure (or similar) report | Portfolio-friendly HTML report with attachments | Done |
 
 ### Configuration you can change without editing Java
-
-Necessary flags (Maven / command line), not only `config.properties`:
 
 ```bash
 mvn test -Dbrowser=chromium -Dheadless=false
 ```
 
-Interviewers often ask: “How do you switch browser or environment without changing code?”
-
 ### YAML files belong in resources, not under `src/main/java`
 
-Necessary Maven convention:
-
-- Keep locator YAML in `src/main/resources/locators/`
-- Keep Java only in `src/main/java/`
-
-Today locators sit under `src/main/java/locators/` because that was your original structure. We can keep the package idea, but professionally they should live as resources. The reader already loads them from the classpath, so this is a move, not a rewrite.
+Today locators sit under `src/main/java/locators/` with a Maven resource include. Optional move to `src/main/resources/locators/` remains polish.
 
 ### Proper Java packages
 
-Necessary for a portfolio repo. Flat names like `pages` and `tests` work, but look unfinished.
-
-Target style:
+Target style (optional polish):
 
 ```
 com.automation.framework.pages
@@ -434,26 +388,22 @@ com.automation.framework.testflow
 com.automation.framework.config
 ```
 
-Do this **once**, after login works on the real site — not before.
-
 ### Java 17 vs your IntelliJ JDK
 
-You have (or had) **OpenJDK 24** in IntelliJ and the project compiles as **Java 17**. That is fine if the IDE language level stays 17. Document it so runs do not fail because of mixed JDKs.
+Project compiles as **Java 17**. Document it so runs do not fail because of mixed JDKs.
 
 ### Definition of Done (when the framework is “finished”)
 
-The original 14 steps never say when we stop. For this project, Done means all of the following:
-
-- [ ] Real public site is automated (not only `demo/login.html`)
-- [ ] Login success + login failure tests pass
-- [ ] At least 3 more flows pass (example: inventory, cart, checkout)
-- [ ] Tests read data from YAML testdata files, not hard-coded strings
-- [ ] Failure screenshot + Allure report works
-- [ ] Playwright trace saved on failure
-- [ ] `test.xml` is the single place that launches the suite
-- [ ] README explains architecture and how to run
-- [ ] Code is on GitHub
-- [ ] GitHub Actions runs `mvn test` on push
+- [x] Real public site is automated (not only `demo/login.html`)
+- [x] Login success + login failure tests pass
+- [x] At least 3 more flows pass (example: inventory, cart, checkout)
+- [x] Tests read data from YAML testdata files, not hard-coded strings
+- [x] Failure screenshot + Allure report works
+- [x] Playwright trace saved on failure
+- [x] `test.xml` is the single place that launches the suite
+- [x] README explains architecture and how to run
+- [x] Code is on GitHub
+- [x] GitHub Actions runs `mvn test` on push
 
 ### What we will not build (keeps the framework focused)
 
@@ -471,54 +421,35 @@ These are **not** necessary for this framework. Skip them unless a later job req
 
 ## Step 15 – Reporting (Allure)
 
-**Status:** `[~]` Listener already imports Allure; `pom.xml` has no Allure dependency/plugin
+**Status:** `[x]` Done
 
-**Why necessary:** A portfolio without a report looks like “I ran tests in the IDE.” Allure shows architecture + evidence.
-
-**Action:**
-
-- Add Allure TestNG dependency and Maven plugin
-- Attach `ScreenshotListener` in `test.xml`
-- Document: `mvn test` then `mvn allure:serve`
+- `allure-testng` + `allure-maven` plugin in `pom.xml`
+- `ScreenshotListener` attached in `test.xml` and attaches PNGs to Allure
+- Documented: `mvn test` then `mvn allure:serve`
 
 ---
 
 ## Step 16 – Playwright trace on failure
 
-**Status:** `[ ]` Not started
+**Status:** `[x]` Done
 
-**Why necessary:** This is the Playwright-specific skill interviewers expect.
-
-**Action:**
-
-- Start tracing in `BaseTest` before each test
-- On failure, save `test-results/traces/<testName>.zip`
-- Document how to open it: `mvn exec:java ... show-trace path.zip`
+- Tracing started in `PlaywrightFactory` on an explicit `BrowserContext`
+- On failure, `BaseTest` saves `test-results/traces/<testName>.zip`
+- Documented in README (`show-trace`)
 
 ---
 
 ## Step 17 – GitHub Actions CI
 
-**Status:** `[ ]` Not started (mentioned as optional under Step 14; it should be required)
+**Status:** `[x]` Done
 
-**Why necessary:** Shows the framework runs without IntelliJ.
-
-**Action:**
-
-- Add `.github/workflows/tests.yml`
-- Install JDK 17, Maven, Playwright browsers
-- Run `mvn test`
-- Upload Allure results or screenshots as artifacts
+- `.github/workflows/tests.yml` — JDK 17, Maven, Chromium install, `mvn test`, artifact upload
 
 ---
 
 ## Step 18 – Command-line config overrides
 
-**Status:** `[ ]` Not started
-
-**Why necessary:** Same suite, different browser/headless/url, no Java edits.
-
-**Action:**
+**Status:** `[x]` Done
 
 - `ConfigReader` reads system property first, then `config.properties`
 - Example: `mvn test -Dheadless=false -Dbrowser=firefox`
