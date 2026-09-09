@@ -90,6 +90,11 @@ public final class ConfigReader {
         return Boolean.parseBoolean(getProperty("headless", "true"));
     }
 
+    /** Whether Playwright records a video for every test. */
+    public static boolean isVideoEnabled() {
+        return Boolean.parseBoolean(getProperty("video", "true"));
+    }
+
     /** Default timeout in milliseconds. */
     public static double getTimeout() {
         return Double.parseDouble(getProperty("timeout", "30000"));

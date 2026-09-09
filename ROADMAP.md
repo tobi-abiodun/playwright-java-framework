@@ -3,8 +3,9 @@
 > **Status (2026-09-09):** Sauce Demo 6-screen TestFlow architecture is complete
 > (Login → Inventory → Cart → Checkout Info → Order Summary → Order Confirmation).
 > TF1–TF28 are assertion-complete; E2E covers TS001–TS020. Failure evidence
-> (screenshots + Allure + Playwright traces), LoggerUtil, CLI `-D` overrides,
-> and GitHub Actions CI are in place. Suite entry: `test.xml`.
+> (screenshots + Allure + Playwright traces), **context video on every test**
+> (`test-results/videos/`, `-Dvideo=false` to disable), LoggerUtil, CLI `-D`
+> overrides, and GitHub Actions CI are in place. Suite entry: `test.xml`.
 >
 > Sections below for Steps 1–10 are **historical** and may be stale; trust this
 > banner and `test-cases/README.md` for current layout.
@@ -51,7 +52,8 @@ When we add a new page, we repeat that same 5-file pattern. We do **not** put Pl
 
 **Done:** 6-screen YAML → Page → Util → TestFlow layers; E2E TS001–TS020;
 TF/TS docs under `test-cases/`; ScreenshotListener + Allure; traces on failure;
-LoggerUtil; CLI overrides; GitHub Actions CI; refreshed README.
+context video recording (every test); LoggerUtil; CLI overrides; GitHub Actions CI;
+refreshed README.
 
 **Next (optional polish):** BasePage inheritance for all pages; move YAML locators
 under `src/main/resources/locators/`; Java package rename to `com.automation.framework.*`.

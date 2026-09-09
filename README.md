@@ -95,6 +95,7 @@ System properties override `config.properties` (no Java edits):
 ```bash
 mvn test -Dbrowser=firefox -Dheadless=false
 mvn test -Dbase.url=https://www.saucedemo.com -Dheadless=true
+mvn test -Dvideo=false
 ```
 
 ## Run tests
@@ -118,22 +119,28 @@ mvn test -Dtest=tests.E2E
 
 Case list (E2E + TestFlows): [test-cases/README.md](test-cases/README.md)
 
-## Failure evidence
+## Evidence (pass + fail)
 
-On failure the suite produces:
+| Artifact | When | Location |
+|----------|------|----------|
+| Video (`.webm`) | Every test (when `video=true`) | `test-results/videos/<test>.webm` |
+| Screenshot | Failure only | `test-results/screenshots/<test>_<timestamp>.png` |
+| Playwright trace | Failure only | `test-results/traces/<test>.zip` |
+| Allure attachments | Video every run; PNG on failure | `mvn allure:serve` |
 
-| Artifact | Location |
-|----------|----------|
-| Screenshot | `test-results/screenshots/<test>_<timestamp>.png` |
-| Playwright trace | `test-results/traces/<test>.zip` |
-| Allure attachment | PNG attached to the failed Allure step |
+Disable video (faster / less disk):
 
-Open a trace:
+```bash
+mvn test -Dvideo=false
+```
+
+Open a failure trace:
 
 ```bash
 mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="show-trace test-results/traces/<test>.zip"
 ```
 
+Play a video in any player that supports WebM (Chrome, VLC, etc.), or open it from the Allure report attachment.
 ## Allure report
 
 ```bash
