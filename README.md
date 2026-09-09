@@ -85,6 +85,7 @@ base.url=https://www.saucedemo.com
 login.url=https://www.saucedemo.com/
 browser=chromium              # chromium | firefox | webkit
 headless=true                 # false to see the browser
+video=true                    # false to skip .webm recording
 timeout=30000                 # milliseconds
 ```
 
